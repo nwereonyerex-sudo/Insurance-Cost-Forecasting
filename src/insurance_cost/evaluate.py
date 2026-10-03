@@ -461,14 +461,13 @@ def fig_residuals_by_feature(X: pd.DataFrame, y_true: ArrayLike, y_pred: ArrayLi
 
 def fig_interactions(pipeline: Pipeline, train_ranges: dict[str, list[float]]) -> Figure:
     """Model predictions across BMI and age for smokers vs non-smokers, others held fixed."""
-    reference = {"age": 40, "sex": "female", "bmi": 30.0, "children": 0, "region": "northeast"}
+    reference = {"age": 40, "sex": "female", "bmi": 25.0, "children": 0, "region": "northeast"}
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.6), sharey=True)
     for ax, col, label in zip(axes, ("bmi", "age"), ("BMI (kg/m²)", "Age (years)"), strict=True):
         lo, hi = train_ranges[col]
-        grid = np.linspace(lo, hi, 60)
+        grid = np.arange(int(lo), int(hi) + 1) if col == "age" else np.linspace(lo, hi, 300)
         for level in ("no", "yes"):
             rows = pd.DataFrame([{**reference, "smoker": level, col: v} for v in grid])
-            rows["age"] = rows["age"].round().astype(int)
             pred = pipeline.predict(rows[list(FEATURES)])
             ax.plot(
                 grid, pred, color=SMOKER_PALETTE[level], linewidth=2, label=SMOKER_LABELS[level]
@@ -481,7 +480,7 @@ def fig_interactions(pipeline: Pipeline, train_ranges: dict[str, list[float]]) -
                 va="center",
                 color=INK,
             )
-        held = "age 40" if col == "bmi" else "BMI 30"
+        held = "age 40" if col == "bmi" else "BMI 25"
         ax.set(
             title=f"Model estimate vs {col.upper() if col == 'bmi' else col} ({held})",
             xlabel=label,

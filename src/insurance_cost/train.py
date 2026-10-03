@@ -31,7 +31,12 @@ from insurance_cost.config import (
     TEST_SIZE,
 )
 from insurance_cost.data import DEFAULT_DUPLICATE_POLICY, file_fingerprint, load_raw, validate
-from insurance_cost.models import CANDIDATES, CANDIDATES_BY_NAME, Candidate
+from insurance_cost.models import (
+    CANDIDATES,
+    CANDIDATES_BY_NAME,
+    Candidate,
+    comparison_candidates,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -140,12 +145,17 @@ def train(
     split = split_data(df)
     logger.info("Train rows: %d, test rows: %d", len(split.X_train), len(split.X_test))
 
+    by_name = {c.name: c for c in candidates}
     cv_table = cross_validate_candidates(split.X_train, split.y_train, candidates)
     selected = select_model(cv_table)
     logger.info("Selected model: %s", selected)
+    comparisons = cross_validate_candidates(
+        split.X_train, split.y_train, comparison_candidates(by_name[selected])
+    )
+    cv_table = pd.concat([cv_table, comparisons], ignore_index=True)
 
     # The artifact is exactly the model evaluated on the test set: fitted on the training split.
-    pipeline = CANDIDATES_BY_NAME[selected].build().fit(split.X_train, split.y_train)
+    pipeline = by_name[selected].build().fit(split.X_train, split.y_train)
     baseline = CANDIDATES_BY_NAME["baseline_mean"].build().fit(split.X_train, split.y_train)
 
     test_pred = pipeline.predict(split.X_test)
@@ -190,7 +200,7 @@ def train(
             artifact_path,
             artifacts.build_metadata(
                 model_name=selected,
-                candidate=CANDIDATES_BY_NAME[selected],
+                candidate=by_name[selected],
                 data_fingerprint=file_fingerprint(data_path),
                 test_metrics=test_metrics,
                 baseline_test_metrics=baseline_test_metrics,

@@ -18,7 +18,8 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from insurance_cost.config import CATEGORY_LEVELS, FEATURES
 
 AGE_CENTER = 40.0
-BMI_CENTER = 30.0
+BMI_CENTER = 25.0
+OBESITY_THRESHOLD = 30.0
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,7 @@ class FeatureSpec:
     age_sq: bool = False
     bmi_sq: bool = False
     smoker_interactions: bool = False
+    obesity_step: bool = False
     include_sex: bool = True
 
     def to_dict(self) -> dict[str, bool]:
@@ -36,10 +38,11 @@ class FeatureSpec:
 
 MAIN_EFFECTS = FeatureSpec()
 ENHANCED = FeatureSpec(age_sq=True, smoker_interactions=True)
+ENHANCED_OBESITY = FeatureSpec(age_sq=True, smoker_interactions=True, obesity_step=True)
 
 
 class FeatureBuilder(BaseEstimator, TransformerMixin):
-    """Add centred numeric terms, squares and smoker interactions to the raw columns.
+    """Add centred numeric terms, squares, an obesity step and smoker interactions.
 
     Stateless: ``fit`` only records the output column names, so there is nothing to leak.
     """
@@ -49,11 +52,13 @@ class FeatureBuilder(BaseEstimator, TransformerMixin):
         age_sq: bool = False,
         bmi_sq: bool = False,
         smoker_interactions: bool = False,
+        obesity_step: bool = False,
         include_sex: bool = True,
     ) -> None:
         self.age_sq = age_sq
         self.bmi_sq = bmi_sq
         self.smoker_interactions = smoker_interactions
+        self.obesity_step = obesity_step
         self.include_sex = include_sex
 
     @classmethod
@@ -66,8 +71,12 @@ class FeatureBuilder(BaseEstimator, TransformerMixin):
             cols.append("age_c_sq")
         if self.bmi_sq:
             cols.append("bmi_c_sq")
+        if self.obesity_step:
+            cols.append("obese")
         if self.smoker_interactions:
             cols += ["smoker_x_age_c", "smoker_x_bmi_c"]
+        if self.obesity_step and self.smoker_interactions:
+            cols.append("smoker_x_obese")
         return cols
 
     def categorical_columns(self) -> list[str]:
@@ -91,10 +100,15 @@ class FeatureBuilder(BaseEstimator, TransformerMixin):
             out["age_c_sq"] = age_c**2
         if self.bmi_sq:
             out["bmi_c_sq"] = bmi_c**2
+        obese = (X["bmi"].astype(float) >= OBESITY_THRESHOLD).astype(float)
+        if self.obesity_step:
+            out["obese"] = obese
         if self.smoker_interactions:
             is_smoker = (X["smoker"] == "yes").astype(float)
             out["smoker_x_age_c"] = is_smoker * age_c
             out["smoker_x_bmi_c"] = is_smoker * bmi_c
+            if self.obesity_step:
+                out["smoker_x_obese"] = is_smoker * obese
         for col in self.categorical_columns():
             out[col] = X[col].astype(object)
         return out

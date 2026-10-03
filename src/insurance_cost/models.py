@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin, clone
@@ -10,7 +10,13 @@ from sklearn.dummy import DummyRegressor
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.pipeline import Pipeline
 
-from insurance_cost.features import ENHANCED, MAIN_EFFECTS, FeatureSpec, build_preprocessor
+from insurance_cost.features import (
+    ENHANCED,
+    ENHANCED_OBESITY,
+    MAIN_EFFECTS,
+    FeatureSpec,
+    build_preprocessor,
+)
 
 
 class ChargesRegressor(BaseEstimator, RegressorMixin):
@@ -87,7 +93,6 @@ class Candidate:
 
 
 ENHANCED_BMI_SQ = FeatureSpec(age_sq=True, bmi_sq=True, smoker_interactions=True)
-ENHANCED_NO_SEX = FeatureSpec(age_sq=True, smoker_interactions=True, include_sex=False)
 
 CANDIDATES: tuple[Candidate, ...] = (
     Candidate(
@@ -114,19 +119,41 @@ CANDIDATES: tuple[Candidate, ...] = (
     ),
     Candidate("ols_enhanced_bmi_sq", "Enhanced OLS + BMI²", ENHANCED_BMI_SQ, "ols", complexity=5),
     Candidate(
-        "ridge_enhanced",
-        "Ridge (alpha=1, standardised) on enhanced features — stability check",
-        ENHANCED,
-        "ridge",
-        selectable=False,
+        "ols_enhanced_obesity",
+        "Enhanced OLS + obese (BMI ≥ 30) and smoker × obese",
+        ENHANCED_OBESITY,
+        "ols",
+        complexity=6,
     ),
     Candidate(
-        "ols_enhanced_no_sex",
-        "Enhanced OLS without sex — fairness comparison",
-        ENHANCED_NO_SEX,
+        "log_enhanced_obesity",
+        "Enhanced + obesity step on log1p(charges), no bias correction",
+        ENHANCED_OBESITY,
         "ols",
-        selectable=False,
+        log_target=True,
+        complexity=7,
     ),
 )
 
 CANDIDATES_BY_NAME: dict[str, Candidate] = {c.name: c for c in CANDIDATES}
+
+
+def comparison_candidates(selected: Candidate) -> tuple[Candidate, ...]:
+    """Comparison-only variants of the selected model: without sex, and a Ridge check."""
+    no_sex = replace(selected.spec, include_sex=False)
+    return (
+        replace(
+            selected,
+            name=f"{selected.name}_no_sex",
+            description=f"{selected.description}, without sex (fairness comparison)",
+            spec=no_sex,
+            selectable=False,
+        ),
+        replace(
+            selected,
+            name=f"{selected.name}_ridge",
+            description=f"Ridge (alpha=1, standardised) on {selected.name} features",
+            kind="ridge",
+            selectable=False,
+        ),
+    )
