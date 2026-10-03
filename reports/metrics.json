@@ -1,0 +1,414 @@
+{
+  "selected_model": "ols_enhanced",
+  "selection_rule": {
+    "rmse_tolerance": 0.05,
+    "simplicity_tolerance": 0.01
+  },
+  "data": {
+    "path": "insurance.csv",
+    "sha256": "388eff679557d08ac19f463d025de5e0b4adc482537c8456d19934d78621fd47",
+    "n_train": 1070,
+    "n_test": 268,
+    "test_size": 0.2,
+    "stratify": "smoker",
+    "random_state": 42,
+    "cv_folds": 5
+  },
+  "cv": [
+    {
+      "model": "baseline_mean",
+      "description": "Predict the training mean",
+      "selectable": false,
+      "complexity": 0,
+      "cv_mae_mean": 9062.32124098,
+      "cv_mae_std": 497.0482093625,
+      "cv_rmse_mean": 12086.4113533164,
+      "cv_rmse_std": 583.4107393676,
+      "cv_r2_mean": -0.0023553576,
+      "cv_r2_std": 0.0025376041
+    },
+    {
+      "model": "ols_main",
+      "description": "OLS, main effects only",
+      "selectable": true,
+      "complexity": 1,
+      "cv_mae_mean": 4256.5775277537,
+      "cv_mae_std": 209.7648694052,
+      "cv_rmse_mean": 6202.0901573582,
+      "cv_rmse_std": 415.2755678278,
+      "cv_r2_mean": 0.7361773555,
+      "cv_r2_std": 0.0161532772
+    },
+    {
+      "model": "ols_enhanced",
+      "description": "OLS + age\u00b2, smoker\u00d7age, smoker\u00d7BMI",
+      "selectable": true,
+      "complexity": 2,
+      "cv_mae_mean": 2952.7823049097,
+      "cv_mae_std": 205.8303293353,
+      "cv_rmse_mean": 4870.2928014354,
+      "cv_rmse_std": 595.4605222203,
+      "cv_r2_mean": 0.8370571994,
+      "cv_r2_std": 0.0271481099
+    },
+    {
+      "model": "log_enhanced",
+      "description": "Enhanced OLS on log1p(charges), no bias correction",
+      "selectable": true,
+      "complexity": 3,
+      "cv_mae_mean": 2923.1813679984,
+      "cv_mae_std": 244.4082540488,
+      "cv_rmse_mean": 5638.8964248352,
+      "cv_rmse_std": 567.3327440075,
+      "cv_r2_mean": 0.7814338942,
+      "cv_r2_std": 0.0309723936
+    },
+    {
+      "model": "log_enhanced_smearing",
+      "description": "Enhanced OLS on log1p(charges), smearing correction",
+      "selectable": true,
+      "complexity": 4,
+      "cv_mae_mean": 3751.2774093968,
+      "cv_mae_std": 219.4925710979,
+      "cv_rmse_mean": 6175.4182348091,
+      "cv_rmse_std": 548.3505207536,
+      "cv_r2_mean": 0.7373930716,
+      "cv_r2_std": 0.0370058799
+    },
+    {
+      "model": "ols_enhanced_bmi_sq",
+      "description": "Enhanced OLS + BMI\u00b2",
+      "selectable": true,
+      "complexity": 5,
+      "cv_mae_mean": 2951.8417615698,
+      "cv_mae_std": 195.9388869717,
+      "cv_rmse_mean": 4863.0964327859,
+      "cv_rmse_std": 579.8227522498,
+      "cv_r2_mean": 0.8376212899,
+      "cv_r2_std": 0.0257863267
+    },
+    {
+      "model": "ridge_enhanced",
+      "description": "Ridge (alpha=1, standardised) on enhanced features \u2014 stability check",
+      "selectable": false,
+      "complexity": 0,
+      "cv_mae_mean": 2973.0911686469,
+      "cv_mae_std": 206.7045330485,
+      "cv_rmse_mean": 4869.8752188698,
+      "cv_rmse_std": 598.8089020469,
+      "cv_r2_mean": 0.8370781706,
+      "cv_r2_std": 0.0273386339
+    },
+    {
+      "model": "ols_enhanced_no_sex",
+      "description": "Enhanced OLS without sex \u2014 fairness comparison",
+      "selectable": false,
+      "complexity": 0,
+      "cv_mae_mean": 2956.6557811795,
+      "cv_mae_std": 197.9529839352,
+      "cv_rmse_mean": 4881.5133171549,
+      "cv_rmse_std": 582.9839110548,
+      "cv_r2_mean": 0.8363680162,
+      "cv_r2_std": 0.0262019977
+    }
+  ],
+  "test": {
+    "mae": 2835.9391941355198,
+    "rmse": 4566.797126803166,
+    "r2": 0.8586375350714505,
+    "mean_signed_error": 65.69181870799909,
+    "n": 268
+  },
+  "baseline_test": {
+    "mae": 9239.520467616063,
+    "rmse": 12146.539891180542,
+    "r2": -3.6456660719830225e-05,
+    "mean_signed_error": 73.33868317377814,
+    "n": 268
+  },
+  "subgroups_test": [
+    {
+      "group": "smoker",
+      "level": "no",
+      "n": 213,
+      "mae": 2411.9166517126,
+      "signed_mean_error": 198.1786837934,
+      "mean_actual": 8232.1182152113
+    },
+    {
+      "group": "smoker",
+      "level": "yes",
+      "n": 55,
+      "mae": 4478.062858428,
+      "signed_mean_error": -447.3936769864,
+      "mean_actual": 32496.6190801818
+    },
+    {
+      "group": "sex",
+      "level": "female",
+      "n": 136,
+      "mae": 2430.6183920045,
+      "signed_mean_error": 689.4936457822,
+      "mean_actual": 11675.7436394853
+    },
+    {
+      "group": "sex",
+      "level": "male",
+      "n": 132,
+      "mae": 3253.542444816,
+      "signed_mean_error": -577.0130940351,
+      "mean_actual": 14794.3491990909
+    },
+    {
+      "group": "region",
+      "level": "northeast",
+      "n": 62,
+      "mae": 3105.1482166865,
+      "signed_mean_error": 267.359580445,
+      "mean_actual": 14009.3186166129
+    },
+    {
+      "group": "region",
+      "level": "northwest",
+      "n": 65,
+      "mae": 2885.9160419428,
+      "signed_mean_error": 320.8436281617,
+      "mean_actual": 11921.8793276923
+    },
+    {
+      "group": "region",
+      "level": "southeast",
+      "n": 73,
+      "mae": 2733.2897571547,
+      "signed_mean_error": -511.0441587378,
+      "mean_actual": 14490.8411176712
+    },
+    {
+      "group": "region",
+      "level": "southwest",
+      "n": 68,
+      "mae": 2652.9091116938,
+      "signed_mean_error": 257.066193875,
+      "mean_actual": 12344.4693695588
+    }
+  ],
+  "largest_test_errors": [
+    {
+      "row_index": 806,
+      "age": 40,
+      "sex": "female",
+      "bmi": 41.42,
+      "children": 1,
+      "smoker": "no",
+      "region": "northwest",
+      "actual": 28476.73499,
+      "predicted": 8430.1001337015,
+      "error": -20046.6348562985
+    },
+    {
+      "row_index": 1012,
+      "age": 61,
+      "sex": "female",
+      "bmi": 33.33,
+      "children": 4,
+      "smoker": "no",
+      "region": "southeast",
+      "actual": 36580.28216,
+      "predicted": 16829.9847529985,
+      "error": -19750.2974070015
+    },
+    {
+      "row_index": 959,
+      "age": 48,
+      "sex": "male",
+      "bmi": 36.67,
+      "children": 1,
+      "smoker": "no",
+      "region": "northwest",
+      "actual": 28468.91901,
+      "predicted": 10030.5260070877,
+      "error": -18438.3930029123
+    },
+    {
+      "row_index": 1039,
+      "age": 19,
+      "sex": "male",
+      "bmi": 27.265,
+      "children": 2,
+      "smoker": "no",
+      "region": "northwest",
+      "actual": 22493.65964,
+      "predicted": 4308.3583173503,
+      "error": -18185.3013226497
+    },
+    {
+      "row_index": 637,
+      "age": 35,
+      "sex": "female",
+      "bmi": 38.095,
+      "children": 2,
+      "smoker": "no",
+      "region": "northeast",
+      "actual": 24915.04626,
+      "predicted": 8447.8333031482,
+      "error": -16467.2129568518
+    },
+    {
+      "row_index": 1211,
+      "age": 39,
+      "sex": "male",
+      "bmi": 34.1,
+      "children": 2,
+      "smoker": "no",
+      "region": "southeast",
+      "actual": 23563.01618,
+      "predicted": 7338.8501423846,
+      "error": -16224.1660376154
+    },
+    {
+      "row_index": 115,
+      "age": 60,
+      "sex": "male",
+      "bmi": 28.595,
+      "children": 0,
+      "smoker": "no",
+      "region": "northeast",
+      "actual": 30259.99556,
+      "predicted": 14374.7457811416,
+      "error": -15885.2497788584
+    },
+    {
+      "row_index": 1162,
+      "age": 30,
+      "sex": "male",
+      "bmi": 38.83,
+      "children": 1,
+      "smoker": "no",
+      "region": "southeast",
+      "actual": 18963.17192,
+      "predicted": 4621.4381576456,
+      "error": -14341.7337623544
+    },
+    {
+      "row_index": 443,
+      "age": 59,
+      "sex": "female",
+      "bmi": 36.52,
+      "children": 1,
+      "smoker": "no",
+      "region": "southeast",
+      "actual": 28287.89766,
+      "predicted": 14042.312406161,
+      "error": -14245.585253839
+    },
+    {
+      "row_index": 917,
+      "age": 45,
+      "sex": "male",
+      "bmi": 22.895,
+      "children": 0,
+      "smoker": "yes",
+      "region": "northeast",
+      "actual": 35069.37452,
+      "predicted": 20934.7725700525,
+      "error": -14134.6019499475
+    }
+  ],
+  "diagnostics": {
+    "test_residual_skew": 2.4063977268261985,
+    "test_residual_mean": -65.69181870799909,
+    "breusch_pagan_pvalue": 0.42088237472757567,
+    "cooks_threshold": 0.003738317757009346,
+    "cooks_n_above_threshold": 78,
+    "cooks_max": 0.07642980070208669,
+    "smearing_factor": 1.0
+  },
+  "coefficients": [
+    {
+      "feature": "intercept",
+      "meaning": "estimate for the reference profile (USD)",
+      "coefficient": 8403.4433350539,
+      "unit": "USD"
+    },
+    {
+      "feature": "age_c",
+      "meaning": "per year of age above 40",
+      "coefficient": 266.4772670035,
+      "unit": "USD"
+    },
+    {
+      "feature": "bmi_c",
+      "meaning": "per BMI point above 30 (non-smokers; smokers add smoker \u00d7 BMI)",
+      "coefficient": -2.6126534117,
+      "unit": "USD"
+    },
+    {
+      "feature": "children",
+      "meaning": "per child covered",
+      "coefficient": 654.9937927902,
+      "unit": "USD"
+    },
+    {
+      "feature": "age_c_sq",
+      "meaning": "curvature: per (years from 40)\u00b2",
+      "coefficient": 3.517525876,
+      "unit": "USD"
+    },
+    {
+      "feature": "smoker_x_age_c",
+      "meaning": "extra per year of age above 40 for smokers",
+      "coefficient": -13.1788581205,
+      "unit": "USD"
+    },
+    {
+      "feature": "smoker_x_bmi_c",
+      "meaning": "extra per BMI point above 30 for smokers",
+      "coefficient": 1519.0557428097,
+      "unit": "USD"
+    },
+    {
+      "feature": "sex_male",
+      "meaning": "male vs female (reference)",
+      "coefficient": -768.9240224085,
+      "unit": "USD"
+    },
+    {
+      "feature": "smoker_yes",
+      "meaning": "smoker vs non-smoker, at age 40 and BMI 30",
+      "coefficient": 22720.1512162663,
+      "unit": "USD"
+    },
+    {
+      "feature": "region_northwest",
+      "meaning": "northwest vs northeast (reference)",
+      "coefficient": -598.500492181,
+      "unit": "USD"
+    },
+    {
+      "feature": "region_southeast",
+      "meaning": "southeast vs northeast (reference)",
+      "coefficient": -1331.9851357258,
+      "unit": "USD"
+    },
+    {
+      "feature": "region_southwest",
+      "meaning": "southwest vs northeast (reference)",
+      "coefficient": -1238.8457627935,
+      "unit": "USD"
+    }
+  ],
+  "train_ranges": {
+    "age": [
+      18.0,
+      64.0
+    ],
+    "bmi": [
+      15.96,
+      53.13
+    ],
+    "children": [
+      0.0,
+      5.0
+    ]
+  }
+}
