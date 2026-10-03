@@ -1,7 +1,7 @@
 # Insurance Cost Forecasting — Project Specification
 
 **Status:** Planned  
-**Version:** 1.0  
+**Version:** 1.1  
 **Primary audience:** Project owner, reviewers, and coding agents  
 **Last updated:** 3 October 2026
 
@@ -147,7 +147,8 @@ Evaluate a small, theory-driven feature set rather than indiscriminate polynomia
 - `age²` to represent nonlinear change with age;
 - `smoker × BMI` to test whether BMI has a different association for smokers;
 - `smoker × age` to test whether age has a different association for smokers;
-- optionally `BMI²` if residual diagnostics support it.
+- optionally `BMI²` if residual diagnostics support it;
+- `obese` (BMI ≥ 30, the conventional obesity threshold) with `smoker × obese`, to test whether the smoker–BMI association is a step at the threshold rather than a straight line. *(Added in v1.1 after EDA and residual diagnostics of the linear `smoker × BMI` model showed a step near BMI 30 for smokers; approved by the project owner.)*
 
 Interaction terms must be generated inside the fitted pipeline or by a deterministic transformer shared by training and inference. Main effects must remain whenever their interaction is included.
 

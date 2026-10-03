@@ -10,7 +10,7 @@ from insurance_cost import explain
 from insurance_cost.artifacts import ArtifactError, load_artifact, save_artifact
 from insurance_cost.config import FEATURES
 from insurance_cost.evaluate import regression_metrics, subgroup_table
-from insurance_cost.models import CANDIDATES_BY_NAME, ChargesRegressor
+from insurance_cost.models import CANDIDATES_BY_NAME, ChargesRegressor, comparison_candidates
 from insurance_cost.train import select_model, split_data, train
 
 FAST = tuple(
@@ -73,7 +73,8 @@ def test_split_is_stratified_and_disjoint(synthetic_df):
 def test_preprocessing_does_not_learn_from_test(synthetic_df):
     """Changing test rows must not change what the fitted pipeline learned."""
     split = split_data(synthetic_df)
-    pipe = CANDIDATES_BY_NAME["ridge_enhanced"].build().fit(split.X_train, split.y_train)
+    ridge = comparison_candidates(CANDIDATES_BY_NAME["ols_enhanced"])[1]
+    pipe = ridge.build().fit(split.X_train, split.y_train)
     scaler = pipe.named_steps["preprocess"].named_steps["encode"].named_transformers_["num"]
     built = pipe.named_steps["preprocess"].named_steps["build"].transform(split.X_train)
     np.testing.assert_allclose(scaler.mean_, built[scaler.feature_names_in_].mean().to_numpy())
@@ -192,3 +193,21 @@ def test_artifact_round_trip_and_schema_check(synthetic_df, tmp_path):
 def test_missing_artifact_message(tmp_path):
     with pytest.raises(ArtifactError, match="insurance_cost.train"):
         load_artifact(tmp_path / "missing.joblib")
+
+
+def test_obesity_explanation_is_relative_to_reference(synthetic_df):
+    """With the obesity step, contributions still sum exactly to the estimate."""
+    X, y = synthetic_df[list(FEATURES)], synthetic_df["charges"]
+    pipe = CANDIDATES_BY_NAME["ols_enhanced_obesity"].build().fit(X, y)
+    for i in range(5):
+        row = X.iloc[[i]]
+        exp = explain.explain_prediction(pipe, row)
+        total = exp["reference_estimate"] + sum(d["contribution"] for d in exp["drivers"])
+        assert total == pytest.approx(pipe[-1].predict_link(pipe[:-1].transform(row))[0])
+
+
+def test_comparison_models_are_added(synthetic_csv):
+    result = train(synthetic_csv, None, None, None, candidates=FAST)
+    names = set(result.cv_table["model"])
+    assert {f"{result.selected}_no_sex", f"{result.selected}_ridge"} <= names
+    assert not result.cv_table.set_index("model").loc[f"{result.selected}_no_sex", "selectable"]

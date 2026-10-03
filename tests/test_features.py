@@ -6,6 +6,7 @@ import pytest
 
 from insurance_cost.features import (
     ENHANCED,
+    ENHANCED_OBESITY,
     MAIN_EFFECTS,
     FeatureBuilder,
     FeatureSpec,
@@ -42,8 +43,8 @@ def test_enhanced_exact_values_and_order(two_rows):
         "region_southeast",
         "region_southwest",
     ]
-    np.testing.assert_allclose(out.iloc[0].to_numpy(), [10, 5, 2, 100, 10, 5, 1, 1, 0, 1, 0])
-    np.testing.assert_allclose(out.iloc[1].to_numpy(), [-10, -5, 0, 100, 0, 0, 0, 0, 0, 0, 0])
+    np.testing.assert_allclose(out.iloc[0].to_numpy(), [10, 10, 2, 100, 10, 10, 1, 1, 0, 1, 0])
+    np.testing.assert_allclose(out.iloc[1].to_numpy(), [-10, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0])
 
 
 def test_main_effects_columns(two_rows):
@@ -70,7 +71,7 @@ def test_exclude_sex_and_bmi_sq(two_rows):
     spec = FeatureSpec(bmi_sq=True, include_sex=False)
     out = build_preprocessor(spec).fit_transform(two_rows)
     assert "sex_male" not in out.columns
-    assert out["bmi_c_sq"].tolist() == [25.0, 25.0]
+    assert out["bmi_c_sq"].tolist() == [100.0, 0.0]
 
 
 def test_order_independent_of_input_column_order(two_rows):
@@ -99,3 +100,26 @@ def test_builder_is_stateless(two_rows):
 def test_missing_column_raises(two_rows):
     with pytest.raises(ValueError, match="bmi"):
         FeatureBuilder().fit(two_rows.drop(columns="bmi"))
+
+
+def test_obesity_step_values_and_threshold(two_rows):
+    rows = pd.concat([two_rows, two_rows.iloc[[0]].assign(bmi=29.99)], ignore_index=True)
+    out = build_preprocessor(ENHANCED_OBESITY).fit_transform(rows)
+    assert list(out.columns[:8]) == [
+        "age_c",
+        "bmi_c",
+        "children",
+        "age_c_sq",
+        "obese",
+        "smoker_x_age_c",
+        "smoker_x_bmi_c",
+        "smoker_x_obese",
+    ]
+    # BMI 35 smoker, BMI 25 non-smoker, BMI 29.99 smoker (just under the threshold).
+    assert out["obese"].tolist() == [1.0, 0.0, 0.0]
+    assert out["smoker_x_obese"].tolist() == [1.0, 0.0, 0.0]
+
+
+def test_obesity_interaction_keeps_main_effect():
+    cols = FeatureBuilder.from_spec(ENHANCED_OBESITY).numeric_columns()
+    assert "obese" in cols and "smoker_x_obese" in cols
