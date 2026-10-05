@@ -31,7 +31,7 @@ Do not introduce a new framework or model-serving layer unless it solves a demon
 ```text
 data/raw/insurance.csv
 notebooks/01_eda.ipynb
-src/insurance_cost/{config,data,features,train,evaluate,explain,artifacts}.py
+src/insurance_cost/{config,data,features,models,train,evaluate,explain,artifacts,inference}.py
 app/streamlit_app.py
 tests/
 reports/figures/

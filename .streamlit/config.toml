@@ -1,0 +1,6 @@
+[browser]
+# Do not send usage statistics; the app must not transmit anything about its use.
+gatherUsageStats = false
+
+[server]
+headless = true

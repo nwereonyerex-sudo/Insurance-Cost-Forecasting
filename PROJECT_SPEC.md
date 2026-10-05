@@ -296,13 +296,16 @@ insurance-cost-forecasting/
 │   ├── train.py
 │   ├── evaluate.py
 │   ├── explain.py
-│   └── artifacts.py
+│   ├── artifacts.py
+│   ├── models.py
+│   └── inference.py
 ├── app/
 │   └── streamlit_app.py
 └── tests/
     ├── test_data.py
     ├── test_features.py
     ├── test_training.py
+    ├── test_evaluate.py
     └── test_app_smoke.py
 ```
 
