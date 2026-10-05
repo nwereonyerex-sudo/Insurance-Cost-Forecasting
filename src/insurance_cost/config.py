@@ -9,7 +9,9 @@ PROJECT_ROOT = Path(os.environ.get("INSURANCE_COST_ROOT", Path(__file__).resolve
 
 DATA_PATH = PROJECT_ROOT / "data" / "raw" / "insurance.csv"
 MODELS_DIR = PROJECT_ROOT / "models"
-ARTIFACT_PATH = MODELS_DIR / "insurance_cost_model.joblib"
+ARTIFACT_PATH = Path(
+    os.environ.get("INSURANCE_COST_ARTIFACT", MODELS_DIR / "insurance_cost_model.joblib")
+)
 METRICS_PATH = PROJECT_ROOT / "reports" / "metrics.json"
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
 
